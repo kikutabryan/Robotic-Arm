@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "..\\Robotic Arm"
+		},
+		{
+			"name": "Robotic Arm ESP32",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

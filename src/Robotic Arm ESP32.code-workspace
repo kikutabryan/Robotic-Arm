@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "BasicOTA",
+			"path": "C:\\Users\\kikut\\Documents\\PlatformIO\\Projects\\BasicOTA"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"cmath": "cpp"
+		}
+	}
+}
