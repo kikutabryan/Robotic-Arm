@@ -26,7 +26,7 @@ private:
     double base_angle;
     double first_joint_angle;
     double second_joint_angle;
-    double gripper_angle;
+    double gripper_joint_angle;
 
     // Angle of the gripper with respect to the horizontal
     double gripper_command_angle;

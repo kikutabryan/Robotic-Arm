@@ -134,7 +134,16 @@ bool RoboticArm::in_bounds(double coordinate_x, double coordinate_y)
  */
 void RoboticArm::inverse_kinematics(double_vec xyz)
 {
-    double second_joint_inside = (pow(xyz[0], 2) + pow(xyz[1], 2) - pow(first_joint_length, 2) - pow(second_joint_length, 2)) / (2 * first_joint_length * second_joint_length);
+    // Convert the xyz coordinates to xyr
+    gripper_xyr = xyz_to_xyr(xyz);
+
+    // Find the position of the second joint
+    second_joint_xyr[0] = gripper_xyr[0] - gripper_length * cos(degrees_to_rad(gripper_command_angle));
+    second_joint_xyr[1] = gripper_xyr[1] - gripper_length * sin(degrees_to_rad(gripper_command_angle));
+    second_joint_xyr[2] = gripper_xyr[2];
+
+    // Calculate the angles of the first, second, and base joint
+    double second_joint_inside = (pow(second_joint_xyr[0], 2) + pow(second_joint_xyr[1], 2) - pow(first_joint_length, 2) - pow(second_joint_length, 2)) / (2 * first_joint_length * second_joint_length);
 
     // Exceptions for the robotic arm second joint
     if (second_inside > 1)
@@ -149,12 +158,12 @@ void RoboticArm::inverse_kinematics(double_vec xyz)
     double first_joint_inside_2;
 
     // Exceptions for the robotic arm first joint part 1
-    if (xyz[0] == 0 && xyz[1] > 0)
+    if (second_joint_xyr[0] == 0 && second_joint_xyr[1] > 0)
         first_joint_inside_1 = PI / 2;
-    else if (xyz[0] == 0 && xyz[1] < 0)
+    else if (second_joint_xyr[0] == 0 && second_joint_xyr[1] < 0)
         first_joint_inside_1 = -PI / 2;
     else
-        first_joint_inside_1 = xyz[1] / xyz[0];
+        first_joint_inside_1 = second_joint_xyr[1] / second_joint_xyr[0];
 
     double first_joint_inside_2_top = second_joint_length * sin(degrees_to_rad(second_joint_angle));
     double first_joint_inside_2_bottom = first_joint_length + second_joint_length * cos(degrees_to_rad(second_joint_angle));
@@ -169,6 +178,12 @@ void RoboticArm::inverse_kinematics(double_vec xyz)
 
     // Angle of the first joint of the robotic arm
     first_joint_angle = rad_to_degrees(atan(first_joint_inside_1) - atan(first_joint_inside_2));
+    
+    // Determine the angle of the gripper joint
+    double first_arm_angle = first_joint_angle;
+    double second_arm_angle = first_arm_angle + second_joint_angle;
+    gripper_joint_angle = gripper_command_angle - second_arm_angle;
+    
 }
 
 /**
