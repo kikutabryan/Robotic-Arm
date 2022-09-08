@@ -134,7 +134,41 @@ bool RoboticArm::in_bounds(double coordinate_x, double coordinate_y)
  */
 void RoboticArm::inverse_kinematics(double_vec xyz)
 {
+    double second_joint_inside = (pow(xyz[0], 2) + pow(xyz[1], 2) - pow(first_joint_length, 2) - pow(second_joint_length, 2)) / (2 * first_joint_length * second_joint_length);
 
+    // Exceptions for the robotic arm second joint
+    if (second_inside > 1)
+        return;
+    else if (second_inside < 1)
+        return;
+
+    // Angle of the second joint of the robotic arm
+    second_joint_angle = rad_to_degrees(acos(second_joint_inside));
+
+    double first_joint_inside_1;
+    double first_joint_inside_2;
+
+    // Exceptions for the robotic arm first joint part 1
+    if (xyz[0] == 0 && xyz[1] > 0)
+        first_joint_inside_1 = PI / 2;
+    else if (xyz[0] == 0 && xyz[1] < 0)
+        first_joint_inside_1 = -PI / 2;
+    else
+        first_joint_inside_1 = xyz[1] / xyz[0];
+
+    double first_joint_inside_2_top = second_joint_length * sin(degrees_to_rad(second_joint_angle));
+    double first_joint_inside_2_bottom = first_joint_length + second_joint_length * cos(degrees_to_rad(second_joint_angle));
+
+    // Exceptions for the robotic arm first joint part 2
+    if (first_joint_inside_2_bottom == 0 && first_joint_inside_2_top > 0)
+        first_joint_inside_2 = PI / 2;
+    else if (first_joint_inside_2_bottom == 0 && first_joint_inside_2_top)
+        first_joint_inside_2 = -PI / 2;
+    else
+        first_joint_inside_2 = first_joint_inside_2_top / first_joint_inside_2_bottom;
+
+    // Angle of the first joint of the robotic arm
+    first_joint_angle = rad_to_degrees(atan(first_joint_inside_1) - atan(first_joint_inside_2));
 }
 
 /**

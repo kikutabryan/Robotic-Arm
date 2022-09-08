@@ -22,7 +22,7 @@ private:
     double_vec second_joint_xyr = double_vec(3);
     double_vec gripper_xyr = double_vec(3);
 
-    // Angles of the joints of the arm with respect to the prior joint
+    // Angles of the joints of the arm with respect to the prior joint (degrees)
     double base_angle;
     double first_joint_angle;
     double second_joint_angle;
