@@ -16,6 +16,7 @@ RoboticArm::RoboticArm(double first_joint_length, double second_joint_length, do
     this->gripper_length = gripper_length;
 }
 
+// *******************************Private Functions*******************************
 /**
  * @brief Convert degrees to radians
  *
@@ -270,7 +271,7 @@ void RoboticArm::manual_xy_rotation(double arm_velocity, double arm_velocity_ang
     }
 }
 
-void manual_xyz(double plane_velocity, double plane_velocity_angle, double z_velocity, double gripper_angle)
+void RoboticArm::manual_xyz(double plane_velocity, double plane_velocity_angle, double z_velocity, double gripper_angle)
 {
     bool update_coordinates = false;
 
@@ -333,7 +334,10 @@ void manual_xyz(double plane_velocity, double plane_velocity_angle, double z_vel
         last_gripper_command_angle = gripper_command_angle;
     }
 }
+// *******************************************************************************
 
+
+// *******************************Public Functions********************************
 /**
  * @brief Modify the angle limits of the servo motors of the robotic arm
  *
@@ -349,3 +353,16 @@ void RoboticArm::change_angle_limits(double min_angle_1, double max_angle_1, dou
     this->min_angle_2 = min_angle_2;
     this->max_angle_2 = max_angle_2;
 }
+
+double_vec RoboticArm::joint_angles(void)
+{
+    double_vec angles(4);
+
+    angles[0] = base_angle;
+    angles[1] = first_joint_angle;
+    angles[2] = second_joint_angle;
+    angles[3] = gripper_joint_angle;
+
+    return angles;
+}
+// *******************************************************************************

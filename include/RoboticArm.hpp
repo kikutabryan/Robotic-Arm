@@ -8,6 +8,7 @@ typedef std::vector<double> double_vec;
 
 class RoboticArm
 {
+    // Constructor function
     RoboticArm(double first_joint_length, double second_joint_length, double gripper_length);
 
 private:
@@ -21,6 +22,9 @@ private:
     double_vec first_joint_xyr = double_vec(3);
     double_vec second_joint_xyr = double_vec(3);
     double_vec gripper_xyr = double_vec(3);
+
+    // Angles of the joints for the home position
+    double_vec home_joint_angles = double_vec(3);
 
     // Angles of the joints of the arm with respect to the prior joint (degrees)
     double base_angle;
@@ -61,16 +65,18 @@ private:
     double_vec xyr_to_xyz(double_vec xyr);
 
     bool in_bounds(double coordinate_x, double coordinate_y);
+    void kinematics(void);
     void inverse_kinematics(void);
+    void initialize_arm(void);
+    void extend_arm(void);
+    void retract_arm(void);
     void manual_xy_rotation(double arm_velocity, double arm_velocity_angle, double angular_velocity, double gripper_angle);
     void manual_xyz(double plane_velocity, double plane_velocity_angle, double z_velocity, double gripper_angle);
     // *******************************************************************************
 
 public:
-    // ***********************************Variables***********************************
-    // *******************************************************************************
-
     // ***********************************Functions***********************************
     void change_angle_limits(double min_angle_1, double max_angle_1, double min_angle_2, double max_angle_2);
+    double_vec joint_angles(void);
     // *******************************************************************************
 };
