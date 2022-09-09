@@ -52,6 +52,7 @@ private:
     long unsigned last_time_base = millis();
     double displacement_arm = 1;
     double displacement_base = 1;
+    // *******************************************************************************
 
     // ***********************************Functions***********************************
     double degrees_to_rad(double degree_angle);
@@ -60,13 +61,16 @@ private:
     double_vec xyr_to_xyz(double_vec xyr);
 
     bool in_bounds(double coordinate_x, double coordinate_y);
-    void inverse_kinematics(double_vec xyz);
+    void inverse_kinematics(void);
     void manual_xy_rotation(double arm_velocity, double arm_velocity_angle, double angular_velocity, double gripper_angle);
+    void manual_xyz(double plane_velocity, double plane_velocity_angle, double z_velocity, double gripper_angle);
+    // *******************************************************************************
 
 public:
     // ***********************************Variables***********************************
-
+    // *******************************************************************************
 
     // ***********************************Functions***********************************
     void change_angle_limits(double min_angle_1, double max_angle_1, double min_angle_2, double max_angle_2);
+    // *******************************************************************************
 };

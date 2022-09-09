@@ -128,14 +128,14 @@ bool RoboticArm::in_bounds(double coordinate_x, double coordinate_y)
 }
 
 /**
- * @brief Calculates the angles (degrees) of the arm for a given position (XYZ)
+ * @brief Calculates the angles (degrees) of the arm for a given a position (XYZ) for the gripper
  * 
  * @param xyz 
  */
-void RoboticArm::inverse_kinematics(double_vec xyz)
+void RoboticArm::inverse_kinematics(void)
 {
     // Convert the xyz coordinates to xyr
-    gripper_xyr = xyz_to_xyr(xyz);
+    gripper_xyr = xyz_to_xyr(gripper_xyz);
 
     // Find the position of the second joint
     second_joint_xyr[0] = gripper_xyr[0] - gripper_length * cos(degrees_to_rad(gripper_command_angle));
@@ -151,7 +151,7 @@ void RoboticArm::inverse_kinematics(double_vec xyz)
     else if (second_inside < 1)
         return;
 
-    // Angle of the second joint of the robotic arm
+    // Set the angle of the second joint of the robotic arm
     second_joint_angle = rad_to_degrees(acos(second_joint_inside));
 
     double first_joint_inside_1;
@@ -176,14 +176,18 @@ void RoboticArm::inverse_kinematics(double_vec xyz)
     else
         first_joint_inside_2 = first_joint_inside_2_top / first_joint_inside_2_bottom;
 
-    // Angle of the first joint of the robotic arm
+    // Set the angle of the first joint of the robotic arm
     first_joint_angle = rad_to_degrees(atan(first_joint_inside_1) - atan(first_joint_inside_2));
     
     // Determine the angle of the gripper joint
     double first_arm_angle = first_joint_angle;
     double second_arm_angle = first_arm_angle + second_joint_angle;
+
+    // Set the angle of the gripper joint of the robotic arm 
     gripper_joint_angle = gripper_command_angle - second_arm_angle;
     
+    // Set the base angle for the robotic arm
+    base_angle = gripper_xyr[2];
 }
 
 /**
@@ -245,6 +249,15 @@ void RoboticArm::manual_xy_rotation(double arm_velocity, double arm_velocity_ang
         second_joint_xyz = xyr_to_xyz(second_joint_xyr);
     }
 
+    // Update the angle of the robotic arm joints
+    inverse_kinematics();
+
+    // Update the position of the first joint
+    first_joint_xyr[0] = first_joint_length * cos(degrees_to_rad(first_joint_angle));
+    first_joint_xyr[1] = first_joint_length * sin(degrees_to_rad(first_joint_angle));
+    first_joint_xyr[2] = base_angle;
+    first_joint_xyz = xyr_to_xyz(first_joint_xyr);
+
     // Update the position of the gripper
     static double last_gripper_command_angle = gripper_command_angle;
     if (gripper_command_angle != last_gripper_command_angle || update_coordinates == true)
@@ -252,7 +265,7 @@ void RoboticArm::manual_xy_rotation(double arm_velocity, double arm_velocity_ang
         gripper_xyr[0] = second_joint_xyr[0] + gripper_length * cos(degrees_to_rad(gripper_command_angle));
         gripper_xyr[1] = second_joint_xyr[1] + gripper_length * sin(degrees_to_rad(gripper_command_angle));
         gripper_xyr[2] = second_joint_xyr[2];
-        gripper_xyz = xyz_to_xyr(gripper_xyr);
+        gripper_xyz = xyr_to_xyz(gripper_xyr);
         last_gripper_command_angle = gripper_command_angle;
     }
 }
