@@ -270,6 +270,70 @@ void RoboticArm::manual_xy_rotation(double arm_velocity, double arm_velocity_ang
     }
 }
 
+void manual_xyz(double plane_velocity, double plane_velocity_angle, double z_velocity, double gripper_angle)
+{
+    bool update_coordinates = false;
+
+    // Manual control of arm movement
+    double delta_time_arm = displacement_arm / plane_velocity;
+    if (millis() - last_time_arm > delta_time_arm * 1000)
+    {
+        // Calculate the displacement in the x and y directions
+        double_vec displacement_xyz(3);
+        displacement_xyz[0] = displacement_arm * cos(degrees_to_rad(arm_velocity_angle));
+        displacement_xyz[1] = displacement_arm * sin(degrees_to_rad(arm_velocity_angle));
+        displacement_xyz[2] = displacement_arm * z_velocity;
+
+        double_vec temporary_xyz(3);
+        temporary_xyz[0] = second_joint_xyz[0] + displacement_xyz[0];
+        temporary_xyz[1] = second_joint_xyz[1] + displacement_xyz[1];
+        temporary_xyz[2] = second_joint_xyz[2] + displacement_xyz[2];
+
+        // Convert xyz to xyr coordinates
+        double_vec temporary_xyr = xyz_to_xyr(temporary_xyz);
+
+        // Check if the updated coordinates are within the boundaries of the arm, if not, check if only one coordinate is when updated
+        if (in_bounds(temporary_xyr[0], temporary_xyr[1]))
+        {
+            second_joint_xyr[0] = temporary_xyr[0];
+            second_joint_xyr[1] = temporary_xyr[1];
+        }
+        else if (in_bounds(temporary_xyr[0], second_joint_xyr[1]))
+            second_joint_xyr[0] = temporary_xyr[0];
+        else if (in_bounds(second_joint_xyr[0], temporary_xyr[1]))
+            second_joint_xyr[1] = temporary_xyr[1];
+
+        second_joint_xyr[2] = temporary_xyr[2];
+        update_coordinates = true;
+    }
+
+    // Check if coordinates were updated, and update if true
+    if (update_coordinates == true)
+    {
+        second_joint_xyz = xyr_to_xyz(second_joint_xyr);
+    }
+
+    // Update the angle of the robotic arm joints
+    inverse_kinematics();
+
+    // Update the position of the first joint
+    first_joint_xyr[0] = first_joint_length * cos(degrees_to_rad(first_joint_angle));
+    first_joint_xyr[1] = first_joint_length * sin(degrees_to_rad(first_joint_angle));
+    first_joint_xyr[2] = base_angle;
+    first_joint_xyz = xyr_to_xyz(first_joint_xyr);
+
+    // Update the position of the gripper
+    static double last_gripper_command_angle = gripper_command_angle;
+    if (gripper_command_angle != last_gripper_command_angle || update_coordinates == true)
+    {
+        gripper_xyr[0] = second_joint_xyr[0] + gripper_length * cos(degrees_to_rad(gripper_command_angle));
+        gripper_xyr[1] = second_joint_xyr[1] + gripper_length * sin(degrees_to_rad(gripper_command_angle));
+        gripper_xyr[2] = second_joint_xyr[2];
+        gripper_xyz = xyr_to_xyz(gripper_xyr);
+        last_gripper_command_angle = gripper_command_angle;
+    }
+}
+
 /**
  * @brief Modify the angle limits of the servo motors of the robotic arm
  *
